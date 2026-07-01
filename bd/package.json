@@ -2,10 +2,10 @@
   "name": "bd",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./server.ts",
   "types": "module",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "tsx watch server.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +22,8 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/node": "^26.1.0"
+    "@types/node": "^26.1.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }
