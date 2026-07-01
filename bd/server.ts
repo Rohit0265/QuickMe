@@ -1,7 +1,10 @@
 import express from "express";
+import "dotenv/config";
+import connectDB from "./database/userDatabase";
 
 const app = express();
 
+connectDB();
 
 app.get("/", (req, res) => {
     res.statusCode = 200;
