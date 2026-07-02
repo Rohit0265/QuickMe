@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 import connectDB from "./database/userDatabase";
 import userRouter from "./routes/user.routes";
 import connectCloudinay from "./database/cloudinary";
+import uploadRouter from "./routes/upload.routes";
 
 const app = express();
 
@@ -22,6 +23,7 @@ connectCloudinay();
 
 // Routes
 app.use("/api/user", userRouter);
+app.use("/api/upload", uploadRouter);
 
 app.get("/", (req, res) => {
     res.statusCode = 200;
