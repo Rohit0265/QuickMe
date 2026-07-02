@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 
 interface UserProfile {
   _id: string;
   username: string;
   fullName: string;
   profilePicture: string;
+}
+
+interface CommentData {
+  _id: string;
+  user: UserProfile;
+  text: string;
+  createdAt: string;
 }
 
 interface PostData {
@@ -17,18 +24,50 @@ interface PostData {
   publicId: string;
   type: "image" | "video";
   caption: string;
+  likes: string[]; // Holds User MongoDB ObjectIds
+  comments: CommentData[];
   createdAt: string;
 }
 
 const Home: React.FC = () => {
   const { user: clerkUser } = useUser();
+  const { getToken } = useAuth();
+  
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Interactive client-side state for likes and bookmarks
-  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+  // Storing currently logged-in user's database ObjectId
+  const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
+
+  // Input states for comments, keyed by post ID
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [savedPosts, setSavedPosts] = useState<Record<string, boolean>>({});
+
+  // Sync / fetch the logged-in user's DB profiles
+  useEffect(() => {
+    const syncUserOnHome = async () => {
+      if (clerkUser) {
+        try {
+          const token = await getToken();
+          const response = await fetch("http://localhost:8080/api/user/sync", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          if (data.success && data.user) {
+            setCurrentUserDbId(data.user._id);
+          }
+        } catch (err) {
+          console.error("Failed to sync user on home mount:", err);
+        }
+      }
+    };
+
+    syncUserOnHome();
+  }, [clerkUser]);
 
   const fetchPosts = async () => {
     try {
@@ -56,11 +95,90 @@ const Home: React.FC = () => {
     fetchPosts();
   }, []);
 
-  const toggleLike = (postId: string) => {
-    setLikedPosts((prev) => ({
+  const toggleLike = async (postId: string) => {
+    if (!clerkUser || !currentUserDbId) {
+      alert("Please log in to like posts.");
+      return;
+    }
+
+    // Optimistically update the UI to toggle the like state instantly
+    setPosts((prevPosts) =>
+      prevPosts.map((p) => {
+        if (p._id === postId) {
+          const alreadyLiked = p.likes.includes(currentUserDbId);
+          const newLikesList = alreadyLiked
+            ? p.likes.filter((id) => id !== currentUserDbId)
+            : [...p.likes, currentUserDbId];
+          return { ...p, likes: newLikesList };
+        }
+        return p;
+      })
+    );
+
+    try {
+      const token = await getToken();
+      const response = await fetch(`http://localhost:8080/api/upload/${postId}/like`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || "Failed to update like in DB");
+      }
+      // Set the exact, updated list from backend response
+      setPosts((prevPosts) =>
+        prevPosts.map((p) => (p._id === postId ? { ...p, likes: data.likes } : p))
+      );
+    } catch (err: any) {
+      console.error("Failed to persist like:", err);
+      // Revert back by refetching posts
+      fetchPosts();
+    }
+  };
+
+  const handleCommentChange = (postId: string, value: string) => {
+    setCommentInputs((prev) => ({
       ...prev,
-      [postId]: !prev[postId],
+      [postId]: value,
     }));
+  };
+
+  const submitComment = async (postId: string) => {
+    const text = commentInputs[postId];
+    if (!text || text.trim() === "") return;
+
+    if (!clerkUser) {
+      alert("Please log in to comment.");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const response = await fetch(`http://localhost:8080/api/upload/${postId}/comment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text: text.trim() }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Clear input field
+        setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
+        // Update comments for this specific post
+        setPosts((prevPosts) =>
+          prevPosts.map((p) => (p._id === postId ? { ...p, comments: data.comments } : p))
+        );
+      } else {
+        alert(data.message || "Failed to add comment.");
+      }
+    } catch (err: any) {
+      console.error("Failed to post comment:", err);
+      alert("Could not post comment. Please try again.");
+    }
   };
 
   const toggleSave = (postId: string) => {
@@ -166,7 +284,7 @@ const Home: React.FC = () => {
         {!loading && !error && posts.length > 0 && (
           <div className="space-y-6">
             {posts.map((post) => {
-              const isLiked = !!likedPosts[post._id];
+              const isLiked = currentUserDbId && post.likes ? post.likes.includes(currentUserDbId) : false;
               const isSaved = !!savedPosts[post._id];
 
               return (
@@ -253,8 +371,8 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Likes count */}
-                    <p className="text-sm font-semibold text-white text-left">
-                      {isLiked ? 15 : 14} likes
+                    <p className="text-sm font-semibold text-white text-left font-sans">
+                      {post.likes ? post.likes.length : 0} likes
                     </p>
 
                     {/* Caption */}
@@ -267,29 +385,52 @@ const Home: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Mock comment section */}
+                    {/* Comments list from database */}
+                    {post.comments && post.comments.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        {post.comments.map((comment) => (
+                          <div key={comment._id} className="text-sm text-left flex gap-2 items-start">
+                            <span className="font-semibold text-white hover:underline cursor-pointer shrink-0">
+                              {comment.user?.username || "anonymous"}
+                            </span>
+                            <span className="text-zinc-300 break-words">{comment.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Relative Date display */}
                     <div className="text-left space-y-1">
-                      <p className="text-zinc-500 text-xs cursor-pointer hover:text-zinc-400">
-                        View all 3 comments
-                      </p>
-                      <p className="text-xs uppercase text-zinc-500 tracking-wider">
+                      <p className="text-[10px] uppercase text-zinc-500 tracking-wider">
                         {formatDate(post.createdAt)}
                       </p>
                     </div>
                   </div>
 
                   {/* Add Comment Row */}
-                  <div className="flex items-center gap-2 px-3.5 py-3 border-t border-zinc-900 bg-black">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      submitComment(post._id);
+                    }}
+                    className="flex items-center gap-2 px-3.5 py-3 border-t border-zinc-900 bg-black"
+                  >
                     <Smile className="w-5 h-5 text-zinc-400 shrink-0 cursor-pointer hover:text-zinc-200" />
                     <input
                       type="text"
+                      value={commentInputs[post._id] || ""}
+                      onChange={(e) => handleCommentChange(post._id, e.target.value)}
                       placeholder="Add a comment..."
                       className="w-full bg-transparent text-sm placeholder-zinc-500 text-white focus:outline-none"
                     />
-                    <button className="text-sky-500 hover:text-white font-semibold text-sm cursor-pointer disabled:opacity-50" disabled>
+                    <button
+                      type="submit"
+                      disabled={!commentInputs[post._id]?.trim()}
+                      className="text-sky-500 hover:text-white font-semibold text-sm cursor-pointer disabled:opacity-50 transition-colors"
+                    >
                       Post
                     </button>
-                  </div>
+                  </form>
 
                 </article>
               );

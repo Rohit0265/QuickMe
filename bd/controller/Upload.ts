@@ -94,6 +94,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
     try {
         const posts = await Post.find()
             .populate("user", "username fullName profilePicture")
+            .populate("comments.user", "username fullName profilePicture")
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -105,6 +106,113 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch posts",
+            error: error.message || error,
+        });
+    }
+};
+
+export const toggleLike = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { postId } = req.params;
+        const { userId } = getAuth(req);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized: Please log in first" });
+            return;
+        }
+
+        const dbUser = await User.findOne({ clerkId: userId });
+        if (!dbUser) {
+            res.status(404).json({ success: false, message: "User not found in database" });
+            return;
+        }
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            res.status(404).json({ success: false, message: "Post not found" });
+            return;
+        }
+
+        const likeIndex = post.likes.indexOf(dbUser._id);
+        let isLiked = false;
+
+        if (likeIndex > -1) {
+            // Already liked, so unlike
+            post.likes.splice(likeIndex, 1);
+        } else {
+            // Not liked, so like
+            post.likes.push(dbUser._id);
+            isLiked = true;
+        }
+
+        await post.save();
+
+        res.status(200).json({
+            success: true,
+            message: isLiked ? "Post liked" : "Post unliked",
+            likes: post.likes,
+            isLiked,
+        });
+    } catch (error: any) {
+        console.error("Error in toggleLike controller:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to toggle like",
+            error: error.message || error,
+        });
+    }
+};
+
+export const addComment = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { postId } = req.params;
+        const { text } = req.body;
+        const { userId } = getAuth(req);
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized: Please log in first" });
+            return;
+        }
+
+        if (!text || text.trim() === "") {
+            res.status(400).json({ success: false, message: "Comment text is required" });
+            return;
+        }
+
+        const dbUser = await User.findOne({ clerkId: userId });
+        if (!dbUser) {
+            res.status(404).json({ success: false, message: "User not found in database" });
+            return;
+        }
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            res.status(404).json({ success: false, message: "Post not found" });
+            return;
+        }
+
+        // Add the comment subdocument
+        post.comments.push({
+            user: dbUser._id,
+            text: text.trim(),
+            createdAt: new Date(),
+        });
+
+        await post.save();
+
+        // Fetch post and populate user info on the new comments list to send to client
+        const populatedPost = await Post.findById(postId)
+            .populate("comments.user", "username fullName profilePicture");
+
+        res.status(201).json({
+            success: true,
+            message: "Comment added successfully",
+            comments: populatedPost?.comments || [],
+        });
+    } catch (error: any) {
+        console.error("Error in addComment controller:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to add comment",
             error: error.message || error,
         });
     }
