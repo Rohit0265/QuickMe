@@ -1,9 +1,26 @@
 import { Request, Response } from "express";
 import { v2 as cloudinary } from "cloudinary";
+import { getAuth } from "@clerk/express";
 import fs from "fs";
+import User from "../models/user.schems";
+import Post from "../models/post.schems";
 
 export const uploadMedia = async (req: Request, res: Response): Promise<void> => {
     try {
+        // Get authenticated user ID from Clerk
+        const { userId } = getAuth(req);
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized: Please log in first" });
+            return;
+        }
+
+        // Find the user in MongoDB
+        const dbUser = await User.findOne({ clerkId: userId });
+        if (!dbUser) {
+            res.status(404).json({ success: false, message: "User not found in database. Make sure you are synced." });
+            return;
+        }
+
         if (!req.file) {
             res.status(400).json({ success: false, message: "No file uploaded" });
             return;
@@ -11,8 +28,9 @@ export const uploadMedia = async (req: Request, res: Response): Promise<void> =>
 
         const filePath = req.file.path;
         const uploadType = req.body.type || "auto"; // 'video' or 'image'
+        const caption = req.body.caption || "";
 
-        console.log(`Uploading file ${req.file.originalname} (${uploadType}) from path ${filePath} to Cloudinary...`);
+        console.log(`Uploading file ${req.file.originalname} (${uploadType}) for user ${dbUser.username} to Cloudinary...`);
 
         // Map request type to Cloudinary resource types
         let resourceType: "auto" | "image" | "video" | "raw" = "auto";
@@ -35,15 +53,22 @@ export const uploadMedia = async (req: Request, res: Response): Promise<void> =>
 
         console.log("Cloudinary upload successful:", result.secure_url);
 
-        res.status(200).json({
-            success: true,
-            message: "File uploaded successfully to Cloudinary",
+        // Create new Post in MongoDB linked to the user
+        const newPost = await Post.create({
+            user: dbUser._id,
             url: result.secure_url,
-            public_id: result.public_id,
-            resource_type: result.resource_type,
-            format: result.format,
-            duration: result.duration || null,
-            bytes: result.bytes,
+            publicId: result.public_id,
+            type: uploadType === "video" ? "video" : "image",
+            caption,
+        });
+
+        // Populate user details for returning to client
+        const populatedPost = await newPost.populate("user", "username fullName profilePicture");
+
+        res.status(201).json({
+            success: true,
+            message: "Post created successfully",
+            post: populatedPost,
         });
     } catch (error: any) {
         console.error("Error in uploadMedia controller:", error);
@@ -59,7 +84,7 @@ export const uploadMedia = async (req: Request, res: Response): Promise<void> =>
 
         res.status(500).json({
             success: false,
-            message: "Failed to upload file to Cloudinary",
+            message: "Failed to create post / upload file",
             error: error.message || error,
         });
     }
