@@ -89,3 +89,23 @@ export const uploadMedia = async (req: Request, res: Response): Promise<void> =>
         });
     }
 };
+
+export const getPosts = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const posts = await Post.find()
+            .populate("user", "username fullName profilePicture")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            posts,
+        });
+    } catch (error: any) {
+        console.error("Error in getPosts controller:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch posts",
+            error: error.message || error,
+        });
+    }
+};
