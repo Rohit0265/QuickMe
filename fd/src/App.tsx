@@ -4,6 +4,7 @@ import { useUser, useAuth } from '@clerk/clerk-react'
 import { Route, Routes } from 'react-router'
 import Home from './pages/Home'
 import Upload from './pages/Upload'
+import Footer from './components/Footer'
 
 const App = () => {
 
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage/>} />
         <Route path="/upload" element={<Upload/>} />
       </Routes>
+      <Footer/>
     </div>
   )
 }
