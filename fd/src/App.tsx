@@ -2,6 +2,7 @@ import React from 'react'
 import LoginPage from './pages/LoginPage'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { Route, Routes } from 'react-router-dom'
+import Home from './pages/Home'
 
 const App = () => {
 
