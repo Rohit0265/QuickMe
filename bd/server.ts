@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 // Connect database
-await connectDB();
-await connectCloudinay();
+connectDB();
+connectCloudinay();
 
 // Routes
 app.use("/api/user", userRouter);
