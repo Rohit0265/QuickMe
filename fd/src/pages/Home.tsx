@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
 
 interface UserProfile {
   _id: string;
@@ -19,9 +21,14 @@ interface PostData {
 }
 
 const Home: React.FC = () => {
+  const { user: clerkUser } = useUser();
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Interactive client-side state for likes and bookmarks
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+  const [savedPosts, setSavedPosts] = useState<Record<string, boolean>>({});
 
   const fetchPosts = async () => {
     try {
@@ -49,62 +56,78 @@ const Home: React.FC = () => {
     fetchPosts();
   }, []);
 
+  const toggleLike = (postId: string) => {
+    setLikedPosts((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
+  const toggleSave = (postId: string) => {
+    setSavedPosts((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const postDate = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - postDate.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 60) return `${diffMins} MINUTES AGO`;
+    if (diffHours < 24) return `${diffHours} HOURS AGO`;
+    if (diffDays < 7) return `${diffDays} DAYS AGO`;
+    return postDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }).toUpperCase();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-gray-950 to-black text-white font-sans antialiased">
-      {/* Background ambient glows */}
-      <div className="absolute top-0 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute top-1/2 left-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-black text-white font-sans antialiased pb-20">
+      {/* Import Instagram Cursive Font */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
+        .instagram-logo {
+          font-family: 'Grand Hotel', cursive;
+        }
+      `}</style>
 
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10 px-4 py-3 sm:px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold shadow-lg shadow-indigo-500/20">
-              C
-            </span>
-            <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              CloudFeed
-            </span>
-          </Link>
+      {/* Header (Top Nav) */}
+      <header className="sticky top-0 z-40 bg-black border-b border-zinc-900 px-4 py-2 flex items-center justify-between max-w-4xl mx-auto w-full">
+        <Link to="/" className="instagram-logo text-3xl font-normal tracking-wide text-white select-none">
+          Instagram
+        </Link>
+        <div className="flex items-center gap-4">
           <Link
             to="/upload"
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold text-sm py-2 px-4 rounded-xl transition-all hover:scale-[1.02] shadow-md shadow-indigo-500/10 cursor-pointer"
+            className="text-white hover:opacity-80 transition-opacity p-1.5"
+            title="Create Post"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth={2} />
+              <line x1="12" y1="8" x2="12" y2="16" strokeWidth={2} />
+              <line x1="8" y1="12" x2="16" y2="12" strokeWidth={2} />
             </svg>
-            Create Post
           </Link>
         </div>
-      </nav>
+      </header>
 
-      {/* Main Content Feed */}
-      <main className="max-w-xl mx-auto px-4 py-8 relative z-10">
+      {/* Centered Posts Feed */}
+      <main className="max-w-[470px] mx-auto px-4 pt-6 space-y-6 w-full">
         
         {/* Loading Skeletons */}
         {loading && (
-          <div className="space-y-8 animate-pulse">
+          <div className="space-y-6">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+              <div key={i} className="bg-black border border-zinc-900 rounded-lg p-3 space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-28 bg-white/10 rounded"></div>
-                    <div className="h-2 w-16 bg-white/10 rounded"></div>
-                  </div>
+                  <div className="w-9 h-9 rounded-full bg-zinc-900 animate-pulse"></div>
+                  <div className="h-3 w-24 bg-zinc-900 rounded animate-pulse"></div>
                 </div>
-                <div className="h-64 w-full bg-white/10 rounded-xl"></div>
-                <div className="h-3 w-3/4 bg-white/10 rounded"></div>
+                <div className="w-full aspect-square bg-zinc-900 rounded animate-pulse"></div>
+                <div className="h-3 w-1/2 bg-zinc-900 rounded animate-pulse"></div>
               </div>
             ))}
           </div>
@@ -112,104 +135,165 @@ const Home: React.FC = () => {
 
         {/* Error Alert */}
         {error && !loading && (
-          <div className="bg-red-500/15 border border-red-500/30 rounded-2xl p-6 text-center space-y-3 shadow-xl">
-            <svg className="w-12 h-12 text-red-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <h3 className="font-bold text-lg text-red-200">Could Not Load Feed</h3>
-            <p className="text-sm text-gray-400">{error}</p>
+          <div className="border border-zinc-900 rounded-lg p-8 text-center space-y-3">
+            <p className="text-zinc-400 text-sm">{error}</p>
             <button
               onClick={fetchPosts}
-              className="mt-2 bg-white/10 hover:bg-white/15 text-white text-xs font-semibold py-2 px-4 rounded-xl border border-white/5 transition-all cursor-pointer"
+              className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs py-1.5 px-4 rounded-lg transition-colors cursor-pointer"
             >
-              Try Again
+              Refresh Feed
             </button>
           </div>
         )}
 
         {/* Empty State */}
         {posts.length === 0 && !loading && !error && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center shadow-xl space-y-4">
-            <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="font-bold text-lg text-gray-200">No Posts Yet</h3>
-            <p className="text-sm text-gray-400 max-w-xs mx-auto">
-              Be the first to share a beautiful picture or a cool video to the global timeline!
+          <div className="border border-zinc-900 rounded-lg p-12 text-center space-y-4">
+            <h3 className="font-bold text-lg">No Posts Yet</h3>
+            <p className="text-sm text-zinc-400 max-w-xs mx-auto">
+              Follow profiles or upload your own photos and videos to fill your feed.
             </p>
             <Link
               to="/upload"
-              className="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold text-sm py-2.5 px-6 rounded-xl transition-all shadow-md cursor-pointer"
+              className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm py-2 px-6 rounded-lg transition-all cursor-pointer"
             >
               Upload First Media
             </Link>
           </div>
         )}
 
-        {/* Posts List */}
+        {/* Posts Feed */}
         {!loading && !error && posts.length > 0 && (
-          <div className="space-y-8">
-            {posts.map((post) => (
-              <article
-                key={post._id}
-                className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-white/20"
-              >
-                {/* Post Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={post.user?.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"}
-                      alt={post.user?.username || "user"}
-                      className="w-10 h-10 rounded-full object-cover border border-white/20"
-                    />
-                    <div className="text-left">
-                      <p className="font-bold text-sm text-gray-200">
-                        @{post.user?.username || "anonymous"}
+          <div className="space-y-6">
+            {posts.map((post) => {
+              const isLiked = !!likedPosts[post._id];
+              const isSaved = !!savedPosts[post._id];
+
+              return (
+                <article
+                  key={post._id}
+                  className="bg-black border border-zinc-900 rounded-lg overflow-hidden"
+                >
+                  {/* Post Header */}
+                  <div className="flex items-center justify-between p-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600">
+                        <img
+                          src={post.user?.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"}
+                          alt={post.user?.username || "user"}
+                          className="w-full h-full rounded-full object-cover border border-black bg-zinc-800"
+                        />
+                      </div>
+                      <div className="text-left leading-tight">
+                        <p className="font-semibold text-sm text-white hover:underline cursor-pointer">
+                          {post.user?.username || "anonymous"}
+                        </p>
+                        <p className="text-[11px] text-zinc-400">
+                          {post.user?.fullName || "Anonymous"}
+                        </p>
+                      </div>
+                    </div>
+                    <button className="text-white hover:text-zinc-400 transition-colors cursor-pointer">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Post Media */}
+                  <div className="bg-zinc-950 flex items-center justify-center overflow-hidden aspect-square border-y border-zinc-900 select-none">
+                    {post.type === "video" ? (
+                      <video
+                        src={post.url}
+                        controls
+                        loop
+                        preload="metadata"
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <img
+                        src={post.url}
+                        alt={post.caption || "Instagram post"}
+                        loading="lazy"
+                        className="w-full h-full object-contain"
+                        onDoubleClick={() => toggleLike(post._id)}
+                      />
+                    )}
+                  </div>
+
+                  {/* Post Actions Panel */}
+                  <div className="p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => toggleLike(post._id)}
+                          className="hover:scale-110 transition-transform cursor-pointer"
+                        >
+                          <Heart
+                            className={`w-6 h-6 transition-colors ${
+                              isLiked ? "fill-red-500 text-red-500" : "text-white"
+                            }`}
+                          />
+                        </button>
+                        <button className="hover:scale-110 transition-transform cursor-pointer">
+                          <MessageCircle className="w-6 h-6 text-white" />
+                        </button>
+                        <button className="hover:scale-110 transition-transform cursor-pointer">
+                          <Send className="w-6 h-6 text-white" />
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => toggleSave(post._id)}
+                        className="hover:scale-110 transition-transform cursor-pointer"
+                      >
+                        <Bookmark
+                          className={`w-6 h-6 transition-colors ${
+                            isSaved ? "fill-white text-white" : "text-white"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Likes count */}
+                    <p className="text-sm font-semibold text-white text-left">
+                      {isLiked ? 15 : 14} likes
+                    </p>
+
+                    {/* Caption */}
+                    {post.caption && (
+                      <div className="text-sm text-left">
+                        <span className="font-semibold text-white mr-2 hover:underline cursor-pointer">
+                          {post.user?.username || "anonymous"}
+                        </span>
+                        <span className="text-zinc-200">{post.caption}</span>
+                      </div>
+                    )}
+
+                    {/* Mock comment section */}
+                    <div className="text-left space-y-1">
+                      <p className="text-zinc-500 text-xs cursor-pointer hover:text-zinc-400">
+                        View all 3 comments
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {post.user?.fullName || "Anonymous User"}
+                      <p className="text-xs uppercase text-zinc-500 tracking-wider">
+                        {formatDate(post.createdAt)}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[11px] text-gray-500 font-medium">
-                    {formatDate(post.createdAt)}
-                  </span>
-                </div>
 
-                {/* Media Container */}
-                <div className="bg-black flex items-center justify-center overflow-hidden aspect-video sm:aspect-square max-h-[500px]">
-                  {post.type === "video" ? (
-                    <video
-                      src={post.url}
-                      controls
-                      preload="metadata"
-                      className="w-full h-full object-contain"
+                  {/* Add Comment Row */}
+                  <div className="flex items-center gap-2 px-3.5 py-3 border-t border-zinc-900 bg-black">
+                    <Smile className="w-5 h-5 text-zinc-400 shrink-0 cursor-pointer hover:text-zinc-200" />
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      className="w-full bg-transparent text-sm placeholder-zinc-500 text-white focus:outline-none"
                     />
-                  ) : (
-                    <img
-                      src={post.url}
-                      alt={post.caption || "Post media"}
-                      loading="lazy"
-                      className="w-full h-full object-contain"
-                    />
-                  )}
-                </div>
-
-                {/* Post Footer */}
-                {post.caption && (
-                  <div className="p-4 border-t border-white/5 text-left bg-black/10">
-                    <p className="text-sm text-gray-300 leading-relaxed">
-                      <span className="font-bold text-white mr-2">
-                        @{post.user?.username || "anonymous"}
-                      </span>
-                      {post.caption}
-                    </p>
+                    <button className="text-sky-500 hover:text-white font-semibold text-sm cursor-pointer disabled:opacity-50" disabled>
+                      Post
+                    </button>
                   </div>
-                )}
-              </article>
-            ))}
+
+                </article>
+              );
+            })}
           </div>
         )}
 
