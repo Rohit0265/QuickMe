@@ -4,6 +4,7 @@ import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
 import connectDB from "./database/userDatabase";
 import userRouter from "./routes/user.routes";
+import connectCloudinay from "./database/cloudinary";
 
 const app = express();
 
@@ -16,7 +17,8 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 // Connect database
-connectDB();
+await connectDB();
+await connectCloudinay();
 
 // Routes
 app.use("/api/user", userRouter);
