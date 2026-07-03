@@ -3,6 +3,7 @@ if (!globalThis.crypto) {
     globalThis.crypto = crypto as any;
 }
 import http from "http";
+import path from "path";
 import { Server } from "socket.io";
 import express from "express";
 import "dotenv/config";
@@ -57,14 +58,26 @@ io.on("connection", (socket) => {
     });
 });
 
+// Serve frontend build static files
+const distPath = path.join(__dirname, "../fd/dist");
+app.use(express.static(distPath));
+
 // Routes
-app.get("/", (req, res) => {
-    res.statusCode = 200;
-    res.send("OK!");
-});
 app.use("/api/user", userRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/messages", messageRouter);
+
+// Fallback: serve index.html for client-side routing
+app.get("*splat", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+        return next();
+    }
+    res.sendFile(path.join(distPath, "index.html"), (err) => {
+        if (err) {
+            res.status(500).send("Index file not found.");
+        }
+    });
+});
 
 server.listen(8080, () => {
     console.log("Server is running on port 8080");

@@ -33,11 +33,11 @@ interface PostData {
 const Home: React.FC = () => {
   const { user: clerkUser } = useUser();
   const { getToken } = useAuth();
-  
+
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Storing currently logged-in user's database ObjectId
   const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
 
@@ -52,7 +52,7 @@ const Home: React.FC = () => {
       if (clerkUser) {
         try {
           const token = await getToken();
-          const response = await fetch("http://localhost:8080/api/user/sync", {
+          const response = await fetch("/api/user/sync", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -76,7 +76,7 @@ const Home: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = await getToken();
-      const response = await fetch("http://localhost:8080/api/upload", {
+      const response = await fetch("/api/upload", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -124,7 +124,7 @@ const Home: React.FC = () => {
 
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:8080/api/upload/${postId}/like`, {
+      const response = await fetch(`/api/upload/${postId}/like`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -163,7 +163,7 @@ const Home: React.FC = () => {
 
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:8080/api/upload/${postId}/comment`, {
+      const response = await fetch(`/api/upload/${postId}/comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -237,7 +237,7 @@ const Home: React.FC = () => {
 
       {/* Centered Posts Feed */}
       <main className="max-w-[470px] mx-auto px-4 pt-6 space-y-6 w-full">
-        
+
         {/* Loading Skeletons */}
         {loading && (
           <div className="space-y-6">
@@ -349,9 +349,8 @@ const Home: React.FC = () => {
                           className="hover:scale-110 transition-transform cursor-pointer"
                         >
                           <Heart
-                            className={`w-6 h-6 transition-colors ${
-                              isLiked ? "fill-red-500 text-red-500" : "text-white"
-                            }`}
+                            className={`w-6 h-6 transition-colors ${isLiked ? "fill-red-500 text-red-500" : "text-white"
+                              }`}
                           />
                         </button>
                         <button className="hover:scale-110 transition-transform cursor-pointer">
@@ -366,9 +365,8 @@ const Home: React.FC = () => {
                         className="hover:scale-110 transition-transform cursor-pointer"
                       >
                         <Bookmark
-                          className={`w-6 h-6 transition-colors ${
-                            isSaved ? "fill-white text-white" : "text-white"
-                          }`}
+                          className={`w-6 h-6 transition-colors ${isSaved ? "fill-white text-white" : "text-white"
+                            }`}
                         />
                       </button>
                     </div>

@@ -35,7 +35,7 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = await getToken();
-      const response = await fetch(`http://localhost:8080/api/user/search?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`/api/user/search?q=${encodeURIComponent(query)}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -73,7 +73,7 @@ const SearchPage: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        
+
         {/* Search Input Box */}
         <div className="relative flex items-center bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 focus-within:border-zinc-500 transition-colors">
           <Search className="w-5 h-5 text-zinc-400 mr-3 shrink-0" />

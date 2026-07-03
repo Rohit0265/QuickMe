@@ -1,0 +1,10 @@
+{
+  "name": "quickme-monorepo",
+  "version": "1.0.0",
+  "description": "QuickMe social media application monorepo",
+  "scripts": {
+    "install:all": "npm install --prefix fd && npm install --prefix bd",
+    "build:frontend": "npm run build --prefix fd",
+    "start": "npx tsx bd/server.ts"
+  }
+}

@@ -14,7 +14,7 @@ const LoginPage = () => {
             if (isSignedIn) {
                 try {
                     const token = await getToken();
-                    const response = await fetch("http://localhost:8080/api/user/sync", {
+                    const response = await fetch("/api/user/sync", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -23,7 +23,7 @@ const LoginPage = () => {
                     });
                     const data = await response.json();
                     console.log("User sync response:", data);
-                    
+
                     // Redirect to home page after successful sync
                     navigate("/", { replace: true });
                 } catch (error) {
@@ -47,7 +47,7 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans antialiased flex flex-col justify-between pb-12">
-            
+
             {/* Import Cursive QuickMe Font */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
@@ -67,10 +67,10 @@ const LoginPage = () => {
             {/* Login Box Centered */}
             <main className="flex-1 flex items-center justify-center px-4">
                 <div className="max-w-[350px] w-full flex flex-col items-center">
-                    
+
                     {/* Main Auth Card */}
                     <div className="w-full bg-zinc-950 border border-zinc-900 rounded-sm p-8 flex flex-col items-center shadow-lg">
-                        
+
                         {/* Wordmark Logo */}
                         <h1 className="quickme-logo text-5xl font-normal tracking-wide text-white select-none mb-8">
                             QuickMe

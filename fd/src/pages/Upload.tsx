@@ -30,7 +30,7 @@ interface UploadResponse {
 const Upload: React.FC = () => {
   const { getToken, userId } = useAuth();
   const { user: clerkUser } = useUser();
-  
+
   const [uploadType, setUploadType] = useState<"video" | "image">("image");
   const [caption, setCaption] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -41,7 +41,7 @@ const Upload: React.FC = () => {
   const [uploadResult, setUploadResult] = useState<PostData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (selectedFile: File | null) => {
@@ -135,7 +135,7 @@ const Upload: React.FC = () => {
       formData.append("type", uploadType);
       formData.append("caption", caption);
 
-      const response = await fetch("http://localhost:8080/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -185,10 +185,10 @@ const Upload: React.FC = () => {
       {/* Main Container */}
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-3xl w-full bg-zinc-950 border border-zinc-900 rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
-          
+
           {/* Left Column: Media Uploader / Preview */}
           <div className="flex-1 bg-zinc-950 relative flex items-center justify-center border-b md:border-b-0 md:border-r border-zinc-900 min-h-[350px] md:min-h-0">
-            
+
             <input
               type="file"
               ref={fileInputRef}
@@ -203,15 +203,14 @@ const Upload: React.FC = () => {
                 onDragOver={userId ? handleDragOver : undefined}
                 onDragLeave={userId ? handleDragLeave : undefined}
                 onDrop={userId ? handleDrop : undefined}
-                className={`w-full h-full p-8 flex flex-col items-center justify-center text-center select-none ${
-                  isDragOver ? "bg-zinc-900/50" : ""
-                }`}
+                className={`w-full h-full p-8 flex flex-col items-center justify-center text-center select-none ${isDragOver ? "bg-zinc-900/50" : ""
+                  }`}
               >
                 <div className="text-white mb-4">
                   <ImageIcon className="w-20 h-20 stroke-[1.2] text-zinc-300 mx-auto" />
                 </div>
                 <p className="text-lg font-light text-zinc-200">Drag photos and videos here</p>
-                
+
                 <button
                   type="button"
                   disabled={!userId || loading}
@@ -226,22 +225,20 @@ const Upload: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setUploadType("image")}
-                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${
-                      uploadType === "image"
+                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${uploadType === "image"
                         ? "bg-white text-black border-white"
                         : "text-zinc-400 border-zinc-800 hover:border-zinc-500"
-                    }`}
+                      }`}
                   >
                     Photos
                   </button>
                   <button
                     type="button"
                     onClick={() => setUploadType("video")}
-                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${
-                      uploadType === "video"
+                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${uploadType === "video"
                         ? "bg-white text-black border-white"
                         : "text-zinc-400 border-zinc-800 hover:border-zinc-500"
-                    }`}
+                      }`}
                   >
                     Videos
                   </button>
@@ -264,7 +261,7 @@ const Upload: React.FC = () => {
                     className="w-full h-full max-h-[500px] object-contain"
                   />
                 )}
-                
+
                 {/* Remove button */}
                 {!loading && (
                   <button
@@ -299,7 +296,7 @@ const Upload: React.FC = () => {
 
           {/* Right Column: Metadata Panel */}
           <div className="w-full md:w-[300px] flex flex-col bg-zinc-950 p-4 justify-between">
-            
+
             <div className="space-y-4">
               {/* Logged in user profile */}
               {clerkUser && (
@@ -324,7 +321,7 @@ const Upload: React.FC = () => {
                   rows={6}
                   className="w-full bg-transparent border-none resize-none p-0 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-0"
                 />
-                
+
                 {/* Character count & emojis */}
                 <div className="relative">
                   <div className="flex justify-between items-center text-xs text-zinc-500 mt-2 border-b border-zinc-900 pb-3">
