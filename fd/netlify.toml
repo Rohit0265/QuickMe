@@ -1,0 +1,16 @@
+[[redirects]]
+  from = "/api/*"
+  to = "YOUR_BACKEND_URL/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/socket.io/*"
+  to = "YOUR_BACKEND_URL/socket.io/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
