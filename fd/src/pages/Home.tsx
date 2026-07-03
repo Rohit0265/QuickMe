@@ -224,17 +224,6 @@ const Home: React.FC = () => {
         </Link>
         <div className="flex items-center gap-4">
           <Link
-            to="/upload"
-            className="text-white hover:opacity-80 transition-opacity p-1.5"
-            title="Create Post"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth={2} />
-              <line x1="12" y1="8" x2="12" y2="16" strokeWidth={2} />
-              <line x1="8" y1="12" x2="16" y2="12" strokeWidth={2} />
-            </svg>
-          </Link>
-          <Link
             to="/messages"
             className="text-white hover:opacity-80 transition-opacity p-1.5"
             title="Messages"
