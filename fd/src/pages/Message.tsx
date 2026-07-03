@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { Send, MessageSquare, Loader2, ArrowLeft, Smile } from "lucide-react";
+import { MessageSquare, Loader2, ArrowLeft, Smile } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 import { io, Socket } from "socket.io-client";
 

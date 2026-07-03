@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Login from '../components/Login'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import { Link, useNavigate } from 'react-router'

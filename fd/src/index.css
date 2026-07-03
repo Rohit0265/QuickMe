@@ -1,1 +1,112 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+/* Theme system: Light Mode Overrides */
+body.light {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+body.light .bg-black {
+  background-color: #ffffff !important;
+}
+
+body.light .bg-zinc-950 {
+  background-color: #f4f4f5 !important;
+}
+
+body.light .bg-zinc-900 {
+  background-color: #e4e4e7 !important;
+}
+
+body.light .bg-zinc-900\/60 {
+  background-color: rgba(228, 228, 231, 0.6) !important;
+}
+
+body.light .bg-zinc-950\/10 {
+  background-color: rgba(244, 244, 245, 0.1) !important;
+}
+
+body.light .bg-zinc-950\/20 {
+  background-color: rgba(244, 244, 245, 0.2) !important;
+}
+
+body.light .bg-zinc-950\/30 {
+  background-color: rgba(244, 244, 245, 0.3) !important;
+}
+
+body.light .bg-zinc-950\/40 {
+  background-color: rgba(244, 244, 245, 0.4) !important;
+}
+
+body.light .text-white {
+  color: #09090b !important;
+}
+
+body.light .text-zinc-100 {
+  color: #18181b !important;
+}
+
+body.light .text-zinc-400 {
+  color: #71717a !important;
+}
+
+body.light .text-zinc-500 {
+  color: #52525b !important;
+}
+
+body.light .border-zinc-900 {
+  border-color: #e4e4e7 !important;
+}
+
+body.light .border-zinc-800 {
+  border-color: #d4d4d8 !important;
+}
+
+/* Specific component overrides for light mode */
+body.light .bg-zinc-800 {
+  background-color: #e4e4e7 !important;
+  color: #09090b !important;
+}
+
+body.light .text-zinc-100 {
+  color: #09090b !important;
+}
+
+body.light input, body.light textarea {
+  color: #09090b !important;
+  background-color: #f4f4f5 !important;
+}
+
+body.light input::placeholder, body.light textarea::placeholder {
+  color: #a1a1aa !important;
+}
+
+/* Ensure cursive logo remains bold / visible */
+body.light .quickme-logo {
+  color: #09090b !important;
+}
+
+/* Hover overlays in light mode */
+body.light .hover\:bg-zinc-900\/20:hover {
+  background-color: rgba(228, 228, 231, 0.2) !important;
+}
+
+/* Header border overrides */
+body.light header {
+  border-color: #e4e4e7 !important;
+  background-color: #ffffff !important;
+}
+
+/* Navigation items hover / active states in footer */
+body.light footer {
+  border-color: #e4e4e7 !important;
+  background-color: #ffffff !important;
+}
+
+body.light footer .text-zinc-400 {
+  color: #71717a !important;
+}
+
+body.light footer .hover\:text-white:hover {
+  color: #09090b !important;
+}

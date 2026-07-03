@@ -1,4 +1,3 @@
-import React from 'react'
 import LoginPage from './pages/LoginPage'
 import { Route, Routes, Navigate } from 'react-router'
 import Home from './pages/Home'

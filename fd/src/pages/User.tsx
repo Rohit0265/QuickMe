@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { Grid, Heart, MessageCircle, LogOut, Loader2, Camera, ArrowLeft } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router";
 
@@ -31,7 +31,6 @@ interface PostData {
 
 const UserPage: React.FC = () => {
   const { getToken, signOut } = useAuth();
-  const { user: clerkUser } = useUser();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
