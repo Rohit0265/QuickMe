@@ -286,9 +286,6 @@ const Upload: React.FC = () => {
                   <Check className="w-8 h-8 stroke-[3]" />
                 </div>
                 <h3 className="text-xl font-medium text-white mb-2">Your post has been shared.</h3>
-                <p className="text-sm text-zinc-400 max-w-xs mb-6">
-                  The media file was uploaded to Cloudinary and registered to your timeline.
-                </p>
                 <Link
                   to="/"
                   className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm py-1.5 px-4 rounded-lg transition-colors"
