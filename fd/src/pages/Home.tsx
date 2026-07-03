@@ -73,7 +73,12 @@ const Home: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("http://localhost:8080/api/upload");
+      const token = await getToken();
+      const response = await fetch("http://localhost:8080/api/upload", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch posts from server.");
       }

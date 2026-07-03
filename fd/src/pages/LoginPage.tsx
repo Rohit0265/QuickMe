@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react'
 import Login from '../components/Login'
 import { useUser, useAuth } from '@clerk/clerk-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
 
 const LoginPage = () => {
     const { user, isLoaded } = useUser()
     const { isSignedIn, getToken } = useAuth()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const syncUserWithDatabase = async () => {
@@ -22,14 +23,19 @@ const LoginPage = () => {
                     });
                     const data = await response.json();
                     console.log("User sync response:", data);
+                    
+                    // Redirect to home page after successful sync
+                    navigate("/", { replace: true });
                 } catch (error) {
                     console.error("Failed to sync user with database:", error);
+                    // Fallback redirect even if sync fails
+                    navigate("/", { replace: true });
                 }
             }
         };
 
         syncUserWithDatabase();
-    }, [isSignedIn, getToken]);
+    }, [isSignedIn, getToken, navigate]);
 
     if (!isLoaded) {
         return (
