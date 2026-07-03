@@ -6,6 +6,7 @@ import Upload from './pages/Upload'
 import User from './pages/User'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
+import Message from './pages/Message'
 
 const App = () => {
   return (
@@ -25,6 +26,11 @@ const App = () => {
         <Route path="/user" element={
           <ProtectedRoute>
             <User/>
+          </ProtectedRoute>
+        } />
+        <Route path='/messages' element={
+          <ProtectedRoute>
+            <Message/>
           </ProtectedRoute>
         } />
         {/* Wildcard to redirect any other URL to / */}

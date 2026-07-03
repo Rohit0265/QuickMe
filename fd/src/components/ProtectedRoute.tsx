@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react'
 import { Navigate } from 'react-router'
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {

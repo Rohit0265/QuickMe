@@ -234,6 +234,13 @@ const Home: React.FC = () => {
               <line x1="8" y1="12" x2="16" y2="12" strokeWidth={2} />
             </svg>
           </Link>
+          <Link
+            to="/messages"
+            className="text-white hover:opacity-80 transition-opacity p-1.5"
+            title="Messages"
+          >
+            <Send className="w-6.5 h-6.5" strokeWidth={2} />
+          </Link>
         </div>
       </header>
 
