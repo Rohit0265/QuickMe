@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import { Route, Routes, Navigate } from 'react-router'
 import Home from './pages/Home'
 import Upload from './pages/Upload'
+import User from './pages/User'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -19,6 +20,11 @@ const App = () => {
         <Route path="/upload" element={
           <ProtectedRoute>
             <Upload/>
+          </ProtectedRoute>
+        } />
+        <Route path="/user" element={
+          <ProtectedRoute>
+            <User/>
           </ProtectedRoute>
         } />
         {/* Wildcard to redirect any other URL to / */}

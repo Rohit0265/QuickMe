@@ -12,7 +12,7 @@ const Footer = () => {
         <Link to="/upload" className="text-zinc-400 hover:text-white transition-all duration-200 p-2 rounded-full cursor-pointer active:scale-95">
           <PlusSquare className="w-6.5 h-6.5" strokeWidth={2} />
         </Link>
-        <Link to="/login" className="text-zinc-400 hover:text-white transition-all duration-200 p-2 rounded-full cursor-pointer active:scale-95">
+        <Link to="/user" className="text-zinc-400 hover:text-white transition-all duration-200 p-2 rounded-full cursor-pointer active:scale-95">
           <User className="w-6.5 h-6.5" strokeWidth={2} />
         </Link>
       </div>
