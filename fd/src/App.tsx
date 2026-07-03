@@ -7,6 +7,7 @@ import User from './pages/User'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import Message from './pages/Message'
+import SearchPage from './pages/Search'
 
 const App = () => {
   return (
@@ -23,9 +24,14 @@ const App = () => {
             <Upload/>
           </ProtectedRoute>
         } />
-        <Route path="/user" element={
+        <Route path="/user/:userId?" element={
           <ProtectedRoute>
             <User/>
+          </ProtectedRoute>
+        } />
+        <Route path="/search" element={
+          <ProtectedRoute>
+            <SearchPage/>
           </ProtectedRoute>
         } />
         <Route path='/messages' element={

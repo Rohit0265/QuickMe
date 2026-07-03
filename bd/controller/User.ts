@@ -53,30 +53,42 @@ export const syncUser = async (req: Request, res: Response) => {
 export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId } = getAuth(req);
+        const { profileId } = req.params;
 
         if (!userId) {
             res.status(401).json({ success: false, message: "Unauthorized" });
             return;
         }
 
-        const dbUser = await User.findOne({ clerkId: userId });
-        if (!dbUser) {
-            res.status(404).json({ success: false, message: "User not found" });
+        const currentUser = await User.findOne({ clerkId: userId });
+        if (!currentUser) {
+            res.status(404).json({ success: false, message: "Logged in user not found in database" });
             return;
         }
 
-        // Fetch posts created by this user
-        const posts = await Post.find({ user: dbUser._id }).sort({ createdAt: -1 });
+        let targetUser = currentUser;
+        if (profileId) {
+            const foundUser = await User.findById(profileId);
+            if (!foundUser) {
+                res.status(404).json({ success: false, message: "Profile user not found" });
+                return;
+            }
+            targetUser = foundUser;
+        }
+
+        // Fetch posts created by target user
+        const posts = await Post.find({ user: targetUser._id }).sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             user: {
-                _id: dbUser._id,
-                username: dbUser.username,
-                fullName: dbUser.fullName,
-                profilePicture: dbUser.profilePicture,
-                followersCount: dbUser.followers ? dbUser.followers.length : 0,
-                followingCount: dbUser.following ? dbUser.following.length : 0,
+                _id: targetUser._id,
+                username: targetUser.username,
+                fullName: targetUser.fullName,
+                profilePicture: targetUser.profilePicture,
+                followersCount: targetUser.followers ? targetUser.followers.length : 0,
+                followingCount: targetUser.following ? targetUser.following.length : 0,
+                isSelf: targetUser._id.toString() === currentUser._id.toString(),
             },
             posts,
         });
@@ -85,6 +97,51 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
         res.status(500).json({
             success: false,
             message: "Internal server error",
+            error: error.message || error,
+        });
+    }
+};
+
+export const searchUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userId } = getAuth(req);
+        const query = (req.query.q as string) || "";
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        const currentUser = await User.findOne({ clerkId: userId });
+        if (!currentUser) {
+            res.status(404).json({ success: false, message: "Logged in user not found in database" });
+            return;
+        }
+
+        if (!query.trim()) {
+            res.status(200).json({ success: true, users: [] });
+            return;
+        }
+
+        // Find users matching search term (username or fullName), excluding current user
+        const users = await User.find({
+            $and: [
+                { _id: { $ne: currentUser._id } },
+                {
+                    $or: [
+                        { username: { $regex: query, $options: "i" } },
+                        { fullName: { $regex: query, $options: "i" } },
+                    ],
+                },
+            ],
+        }).select("username fullName profilePicture");
+
+        res.status(200).json({ success: true, users });
+    } catch (error: any) {
+        console.error("Error in searchUsers controller:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error during search",
             error: error.message || error,
         });
     }

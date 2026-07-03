@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { Send, MessageSquare, Loader2, ArrowLeft, Smile } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { io, Socket } from "socket.io-client";
 
 interface UserProfile {
@@ -23,6 +23,8 @@ const MessagePage: React.FC = () => {
   const { getToken } = useAuth();
   const { user: clerkUser } = useUser();
   const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const queryUserId = searchParams.get("userId");
   
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -84,6 +86,16 @@ const MessagePage: React.FC = () => {
 
     initializeChat();
   }, [clerkUser]);
+
+  // 1.5 Auto-select user from query parameter (e.g. redirected from Search page)
+  useEffect(() => {
+    if (queryUserId && users.length > 0) {
+      const targetUser = users.find((u) => u._id === queryUserId);
+      if (targetUser) {
+        setSelectedUser(targetUser);
+      }
+    }
+  }, [queryUserId, users]);
 
   // 2. Set up Socket.io connection when database user ID is available
   useEffect(() => {

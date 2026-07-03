@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { Grid, Heart, MessageCircle, LogOut, Loader2, Camera } from "lucide-react";
-import { Link } from "react-router";
+import { Grid, Heart, MessageCircle, LogOut, Loader2, Camera, ArrowLeft } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router";
 
 interface UserProfileData {
   _id: string;
@@ -10,6 +10,7 @@ interface UserProfileData {
   profilePicture: string;
   followersCount: number;
   followingCount: number;
+  isSelf?: boolean;
 }
 
 interface CommentData {
@@ -31,6 +32,8 @@ interface PostData {
 const UserPage: React.FC = () => {
   const { getToken, signOut } = useAuth();
   const { user: clerkUser } = useUser();
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +44,10 @@ const UserPage: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = await getToken();
-      const response = await fetch("http://localhost:8080/api/user/profile", {
+      const url = userId 
+        ? `http://localhost:8080/api/user/profile/${userId}`
+        : "http://localhost:8080/api/user/profile";
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -68,7 +74,7 @@ const UserPage: React.FC = () => {
 
   useEffect(() => {
     fetchProfileAndPosts();
-  }, []);
+  }, [userId]);
 
   if (loading) {
     return (
@@ -97,16 +103,28 @@ const UserPage: React.FC = () => {
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-black border-b border-zinc-900 px-4 py-3 flex items-center justify-between max-w-4xl mx-auto w-full">
         <div className="flex items-center gap-2">
+          {!profile.isSelf && (
+            <button
+              onClick={() => navigate(-1)}
+              className="text-zinc-400 hover:text-white mr-2 flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <span className="font-bold text-lg">{profile.username}</span>
         </div>
-        <button
-          onClick={() => signOut()}
-          className="text-red-500 hover:text-red-400 flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
-          title="Sign Out"
-        >
-          <LogOut className="w-4.5 h-4.5" />
-          <span>Sign Out</span>
-        </button>
+        {profile.isSelf ? (
+          <button
+            onClick={() => signOut()}
+            className="text-red-500 hover:text-red-400 flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
+            title="Sign Out"
+          >
+            <LogOut className="w-4.5 h-4.5" />
+            <span>Sign Out</span>
+          </button>
+        ) : (
+          <div className="w-5"></div>
+        )}
       </header>
 
       {/* Profile Details section */}
@@ -131,12 +149,21 @@ const UserPage: React.FC = () => {
             {/* Username + Edit action row */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
               <h2 className="text-xl sm:text-2xl font-light tracking-wide">{profile.username}</h2>
-              <Link
-                to="/upload"
-                className="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm py-1.5 px-4 rounded-md transition-colors cursor-pointer"
-              >
-                Create New Post
-              </Link>
+              {profile.isSelf ? (
+                <Link
+                  to="/upload"
+                  className="bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-xs sm:text-sm py-1.5 px-4 rounded-md transition-colors cursor-pointer"
+                >
+                  Create New Post
+                </Link>
+              ) : (
+                <button
+                  onClick={() => navigate(`/messages?userId=${profile._id}`)}
+                  className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs sm:text-sm py-1.5 px-4 rounded-md transition-colors cursor-pointer"
+                >
+                  Message
+                </button>
+              )}
             </div>
 
             {/* Counts */}
@@ -183,15 +210,23 @@ const UserPage: React.FC = () => {
                 <Camera className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold">No Posts Yet</h3>
-              <p className="text-sm text-zinc-500 max-w-xs">
-                When you share photos or videos, they will appear on your profile.
-              </p>
-              <Link
-                to="/upload"
-                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm py-2 px-6 rounded-lg transition-colors cursor-pointer"
-              >
-                Share your first post
-              </Link>
+              {profile.isSelf ? (
+                <>
+                  <p className="text-sm text-zinc-500 max-w-xs">
+                    When you share photos or videos, they will appear on your profile.
+                  </p>
+                  <Link
+                    to="/upload"
+                    className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm py-2 px-6 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Share your first post
+                  </Link>
+                </>
+              ) : (
+                <p className="text-sm text-zinc-500 max-w-xs">
+                  This user has not shared any posts yet.
+                </p>
+              )}
             </div>
           ) : (
             /* Posts Grid */
