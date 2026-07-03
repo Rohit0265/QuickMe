@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://autonomous-ouw8.vercel.app/api/:path*"
+    },
+    {
+      "source": "/socket.io/:path*",
+      "destination": "https://autonomous-ouw8.vercel.app/socket.io/:path*"
+    },
+    {
+      "source": "/((?!api|socket.io).*)$",
+      "destination": "/index.html"
+    }
+  ]
+}
