@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, Image as ImageIcon, MapPin, ChevronDown, Check } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Check } from "lucide-react";
 import { Link } from "react-router";
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 
 interface UserProfile {
   _id: string;
@@ -39,6 +40,7 @@ const Upload: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<PostData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -327,18 +329,39 @@ const Upload: React.FC = () => {
                 />
                 
                 {/* Character count & emojis */}
-                <div className="flex justify-between items-center text-xs text-zinc-500 mt-2 border-b border-zinc-900 pb-3">
-                  <button className="text-zinc-500 hover:text-zinc-300">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  <span>{caption.length}/2,200</span>
+                <div className="relative">
+                  <div className="flex justify-between items-center text-xs text-zinc-500 mt-2 border-b border-zinc-900 pb-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                    <span>{caption.length}/2,200</span>
+                  </div>
+
+                  {showEmojiPicker && (
+                    <div className="absolute z-50 bottom-10 left-0">
+                      <div className="fixed inset-0" onClick={() => setShowEmojiPicker(false)} />
+                      <div className="relative">
+                        <EmojiPicker
+                          onEmojiClick={(emojiObject) => {
+                            setCaption((prev) => prev + emojiObject.emoji);
+                          }}
+                          autoFocusSearch={false}
+                          theme={Theme.DARK}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Settings Rows */}
-              <div className="space-y-3 pt-2 text-sm text-left">
+              {/* <div className="space-y-3 pt-2 text-sm text-left">
                 <div className="flex items-center justify-between text-zinc-300 py-1 hover:text-white cursor-pointer">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-zinc-400" />
@@ -356,7 +379,7 @@ const Upload: React.FC = () => {
                   <span>Advanced settings</span>
                   <ChevronDown className="w-4 h-4 text-zinc-500" />
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Bottom State Monitor */}

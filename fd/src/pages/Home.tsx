@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile } from "lucide-react";
 import { useUser, useAuth } from "@clerk/clerk-react";
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 
 interface UserProfile {
   _id: string;
@@ -43,6 +44,7 @@ const Home: React.FC = () => {
   // Input states for comments, keyed by post ID
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [savedPosts, setSavedPosts] = useState<Record<string, boolean>>({});
+  const [activeEmojiPickerPostId, setActiveEmojiPickerPostId] = useState<string | null>(null);
 
   // Sync / fetch the logged-in user's DB profiles
   useEffect(() => {
@@ -414,9 +416,28 @@ const Home: React.FC = () => {
                       e.preventDefault();
                       submitComment(post._id);
                     }}
-                    className="flex items-center gap-2 px-3.5 py-3 border-t border-zinc-900 bg-black"
+                    className="flex items-center gap-2 px-3.5 py-3 border-t border-zinc-900 bg-black relative"
                   >
-                    <Smile className="w-5 h-5 text-zinc-400 shrink-0 cursor-pointer hover:text-zinc-200" />
+                    <div className="relative flex items-center">
+                      <Smile
+                        onClick={() => setActiveEmojiPickerPostId(prev => prev === post._id ? null : post._id)}
+                        className="w-5 h-5 text-zinc-400 shrink-0 cursor-pointer hover:text-zinc-200"
+                      />
+                      {activeEmojiPickerPostId === post._id && (
+                        <div className="absolute z-50 bottom-8 left-0">
+                          <div className="fixed inset-0" onClick={() => setActiveEmojiPickerPostId(null)} />
+                          <div className="relative">
+                            <EmojiPicker
+                              onEmojiClick={(emojiObject) => {
+                                handleCommentChange(post._id, (commentInputs[post._id] || "") + emojiObject.emoji);
+                              }}
+                              autoFocusSearch={false}
+                              theme={Theme.DARK}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={commentInputs[post._id] || ""}
