@@ -209,18 +209,18 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans antialiased pb-20">
-      {/* Import Instagram Cursive Font */}
+      {/* Import QuickMe Cursive Font */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
-        .instagram-logo {
+        .quickme-logo {
           font-family: 'Grand Hotel', cursive;
         }
       `}</style>
 
       {/* Header (Top Nav) */}
       <header className="sticky top-0 z-40 bg-black border-b border-zinc-900 px-4 py-2 flex items-center justify-between max-w-4xl mx-auto w-full">
-        <Link to="/" className="instagram-logo text-3xl font-normal tracking-wide text-white select-none">
-          Instagram
+        <Link to="/" className="quickme-logo text-3xl font-normal tracking-wide text-white select-none">
+          QuickMe
         </Link>
         <div className="flex items-center gap-4">
           <Link
@@ -341,7 +341,7 @@ const Home: React.FC = () => {
                     ) : (
                       <img
                         src={post.url}
-                        alt={post.caption || "Instagram post"}
+                        alt={post.caption || "QuickMe post"}
                         loading="lazy"
                         className="w-full h-full object-contain"
                         onDoubleClick={() => toggleLike(post._id)}

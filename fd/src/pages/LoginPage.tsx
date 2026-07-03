@@ -48,10 +48,10 @@ const LoginPage = () => {
     return (
         <div className="min-h-screen bg-black text-white font-sans antialiased flex flex-col justify-between pb-12">
             
-            {/* Import Cursive Instagram Font */}
+            {/* Import Cursive QuickMe Font */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
-                .instagram-logo {
+                .quickme-logo {
                     font-family: 'Grand Hotel', cursive;
                 }
             `}</style>
@@ -72,8 +72,8 @@ const LoginPage = () => {
                     <div className="w-full bg-zinc-950 border border-zinc-900 rounded-sm p-8 flex flex-col items-center shadow-lg">
                         
                         {/* Wordmark Logo */}
-                        <h1 className="instagram-logo text-5xl font-normal tracking-wide text-white select-none mb-8">
-                            Instagram
+                        <h1 className="quickme-logo text-5xl font-normal tracking-wide text-white select-none mb-8">
+                            QuickMe
                         </h1>
 
                         {/* Signed In Welcome State */}
@@ -106,7 +106,7 @@ const LoginPage = () => {
 
                     {/* Bottom disclaimer */}
                     <p className="text-zinc-500 text-xs mt-6 text-center leading-relaxed">
-                        InstaCloud from Google DeepMind.<br />
+                        QuickMe from Google DeepMind.<br />
                         This application is secured using Clerk authentication and stores files on Cloudinary.
                     </p>
 
@@ -122,9 +122,9 @@ const LoginPage = () => {
                     <span className="hover:underline cursor-pointer">Privacy</span>
                     <span className="hover:underline cursor-pointer">Terms</span>
                     <span className="hover:underline cursor-pointer">Locations</span>
-                    <span className="hover:underline cursor-pointer">Instagram Lite</span>
+                    <span className="hover:underline cursor-pointer">QuickMe Lite</span>
                 </div>
-                <p>© 2026 INSTACLOUD FROM GOOGLE DEEPMIND</p>
+                <p>© 2026 QUICKME FROM GOOGLE DEEPMIND</p>
             </footer>
 
         </div>

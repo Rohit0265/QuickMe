@@ -158,7 +158,7 @@ const UserPage: React.FC = () => {
             {/* Full Name */}
             <div>
               <h1 className="font-semibold text-sm sm:text-base text-zinc-100">{profile.fullName}</h1>
-              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">InstaCloud Profile</p>
+              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">QuickMe Profile</p>
             </div>
 
           </div>
@@ -213,7 +213,7 @@ const UserPage: React.FC = () => {
                   ) : (
                     <img
                       src={post.url}
-                      alt={post.caption || "Instagram post"}
+                      alt={post.caption || "QuickMe post"}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
