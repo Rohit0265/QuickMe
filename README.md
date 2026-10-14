@@ -9,7 +9,7 @@ A full-stack social media app for sharing photos and videos, with likes, comment
 - **Feed** showing all posts, newest first, with inline video playback
 - **Likes** with optimistic UI updates
 - **Comments** with an emoji picker
-- **User search** and public profile pages with a post grid
+- **User search** and public proffgvbfgbile pages with a post grid
 - **Real-time direct messages** over Socket.IO, with message history stored in MongoDB
 
 ## Tech Stack
